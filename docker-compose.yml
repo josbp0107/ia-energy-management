@@ -1,0 +1,18 @@
+# Las credenciales salen de backend/.env
+#   docker compose --env-file backend/.env up -d
+services:
+  postgres:
+    image: postgres:17
+    container_name: ia-energy-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:?missing DB_NAME; use --env-file backend/.env}
+      POSTGRES_USER: ${DB_USER:?missing DB_USER; use --env-file backend/.env}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?missing DB_PASSWORD; use --env-file backend/.env}
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:

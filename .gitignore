@@ -1,0 +1,25 @@
+.env
+*.env.local
+
+# Go
+backend/bin/
+*.exe
+*.test
+*.out
+
+# Node / Next.js
+node_modules/
+frontend/.next/
+frontend/out/
+*.tsbuildinfo
+next-env.d.ts
+
+# Salidas del prototipo y del evaluador
+analysis_output.json
+expected_results.csv
+
+# Editor / SO
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

@@ -1,0 +1,13 @@
+meter_id,name,location
+M-101,Oficinas administrativas,Sede Central - Piso 2
+M-102,Data center,Sede Central - Sótano
+M-103,Climatización central,Sede Central - Azotea
+M-104,Planta de producción A,Planta Norte - Nave 1
+M-105,Planta de producción B,Planta Norte - Nave 2
+M-106,Compresores de aire,Planta Norte - Sala técnica
+M-107,Bodega refrigerada,Centro logístico - Muelle 1
+M-108,Iluminación exterior,Centro logístico - Patio
+M-109,Línea de empaque,Planta Sur - Nave 3
+M-110,Taller de mantenimiento,Planta Sur - Nave 4
+M-111,Laboratorio de calidad,Planta Sur - Edificio C
+M-112,Subestación auxiliar,Planta Sur - Exterior
