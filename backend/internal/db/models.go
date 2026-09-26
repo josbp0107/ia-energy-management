@@ -14,12 +14,44 @@ const (
 	SeverityHigh   = "HIGH"
 	SeverityMedium = "MEDIUM"
 	SeverityLow    = "LOW"
+	SeverityNone   = "NONE"
+
+	TypeNormal             = "NORMAL"
+	TypeRealAnomaly        = "REAL_ANOMALY"
+	TypeExplainableAnomaly = "EXPLAINABLE_ANOMALY"
+	TypeFalsePositive      = "FALSE_POSITIVE"
+	TypeDataQuality        = "DATA_QUALITY"
+
+	EventOperationalChange = "OPERATIONAL_CHANGE"
+	EventScheduledOutage   = "SCHEDULED_OUTAGE"
+	EventDataQuality       = "DATA_QUALITY"
+	EventUnknown           = "UNKNOWN"
 
 	AnomalyStatusOpen          = "OPEN"
 	AnomalyStatusInvestigating = "INVESTIGATING"
 	AnomalyStatusResolved      = "RESOLVED"
 	AnomalyStatusDismissed     = "DISMISSED"
+
+	MeterStatusNormal   = "NORMAL"   // sin anomalía (o falso positivo descartado)
+	MeterStatusAlert    = "ALERT"    // anomalía MEDIUM/LOW
+	MeterStatusCritical = "CRITICAL" // anomalía HIGH
+
+	StepReadings       = "READINGS"
+	StepBaseline       = "BASELINE"
+	StepDetection      = "DETECTION"
+	StepCorrelation    = "CORRELATION"
+	StepEvents         = "EVENTS"
+	StepExplanation    = "EXPLANATION"
+	StepRecommendation = "RECOMMENDATION"
 )
+
+var AnalysisSteps = []string{
+	StepReadings, StepBaseline, StepDetection, StepCorrelation, StepEvents, StepExplanation, StepRecommendation,
+}
+
+var AnomalyStatuses = []string{
+	AnomalyStatusOpen, AnomalyStatusInvestigating, AnomalyStatusResolved, AnomalyStatusDismissed,
+}
 
 type Meter struct {
 	MeterID   string    `gorm:"column:meter_id;primaryKey" json:"meter_id"`
@@ -66,6 +98,7 @@ type Anomaly struct {
 	Confidence        float64        `gorm:"column:confidence;not null" json:"confidence"`
 	Reason            string         `gorm:"column:reason" json:"reason"`
 	RecommendedAction string         `gorm:"column:recommended_action" json:"recommended_action"`
+	ExplanationSource string         `gorm:"column:explanation_source" json:"explanation_source"` // llm | template
 	PriorityScore     float64        `gorm:"column:priority_score;not null;index" json:"priority_score"`
 	VariationPct      float64        `gorm:"column:variation_pct" json:"variation_pct"`
 	BaselineKWhDay    float64        `gorm:"column:baseline_kwh_day" json:"baseline_kwh_day"`

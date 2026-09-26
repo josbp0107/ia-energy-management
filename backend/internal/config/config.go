@@ -1,20 +1,36 @@
-// Config variables de entorno
 package config
 
 import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/joho/godotenv"
 )
 
 type Config struct {
-	AppPort        string
-	FrontendOrigin string
-	DataDir        string
-	DB             DBConfig
+	AppPort           string
+	FrontendOrigin    string
+	DataDir           string
+	AnalysisStepDelay time.Duration
+	AI                AIConfig
+	Auth              AuthConfig
+	DB                DBConfig
+}
+
+type AuthConfig struct {
+	Email    string
+	Password string
+	Name     string
+}
+
+type AIConfig struct {
+	APIKey  string
+	Model   string
+	Timeout time.Duration
 }
 
 type DBConfig struct {
@@ -42,8 +58,13 @@ func Load() (Config, error) {
 
 	cfg := Config{
 		AppPort:        optional("APP_PORT", "8080"),
-		FrontendOrigin: optional("FRONTEND_ORIGIN", "http://localhost:3000"),
+		FrontendOrigin: optional("FRONTEND_ORIGIN", "http://localhost:5173"),
 		DataDir:        optional("DATA_DIR", "../data"),
+		Auth: AuthConfig{
+			Email:    required("DEMO_EMAIL"),
+			Password: required("DEMO_PASSWORD"),
+			Name:     optional("DEMO_NAME", "Operador Demo"),
+		},
 		DB: DBConfig{
 			Host:     required("DB_HOST"),
 			Port:     required("DB_PORT"),
@@ -52,6 +73,22 @@ func Load() (Config, error) {
 			Name:     required("DB_NAME"),
 			SSLMode:  optional("DB_SSLMODE", "disable"),
 		},
+	}
+
+	delayMs, err := strconv.Atoi(optional("ANALYSIS_STEP_DELAY_MS", "700"))
+	if err != nil || delayMs < 0 {
+		return Config{}, fmt.Errorf("ANALYSIS_STEP_DELAY_MS debe ser un entero >= 0")
+	}
+	cfg.AnalysisStepDelay = time.Duration(delayMs) * time.Millisecond
+
+	timeoutSec, err := strconv.Atoi(optional("AI_TIMEOUT_SECONDS", "60"))
+	if err != nil || timeoutSec <= 0 {
+		return Config{}, fmt.Errorf("AI_TIMEOUT_SECONDS debe ser un entero > 0")
+	}
+	cfg.AI = AIConfig{
+		APIKey:  os.Getenv("ANTHROPIC_API_KEY"),
+		Model:   optional("ANTHROPIC_MODEL", "claude-opus-5"),
+		Timeout: time.Duration(timeoutSec) * time.Second,
 	}
 
 	if len(missing) > 0 {

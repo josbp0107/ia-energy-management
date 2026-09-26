@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"net/url"
+	"time"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,4 +31,14 @@ func Connect(cfg config.DBConfig) (*gorm.DB, error) {
 	}
 
 	return database, nil
+}
+
+func FailInterruptedRuns(database *gorm.DB) error {
+	return database.Model(&AnalysisRun{}).
+		Where("status = ?", RunStatusRunning).
+		Updates(map[string]any{
+			"status":      RunStatusFailed,
+			"error":       "interrumpido por reinicio del servidor",
+			"finished_at": time.Now().UTC(),
+		}).Error
 }
