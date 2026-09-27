@@ -34,7 +34,7 @@ function eventRole(
   )
   if (!inWindow) {
     return {
-      text: `Fuera de la ventana de ${rules?.event_window_hours ?? "…"} h`,
+      text: `A más de ${rules?.event_window_hours ?? "…"} h del inicio`,
       variant: "secondary",
     }
   }
@@ -58,9 +58,9 @@ export function EventsCard({
       <CardHeader>
         <CardTitle>Eventos operativos</CardTitle>
         <CardDescription>
-          Solo {rules?.explaining_events.join(" o ") ?? "ciertos eventos"} a ±
-          {rules?.event_window_hours ?? "…"} h del inicio explican una
-          desviación. Un evento UNKNOWN no explica nada.
+          Solo {rules?.explaining_events.join(" o ") ?? "ciertos eventos"}{" "}
+          ocurridos hasta {rules?.event_window_hours ?? "…"} h antes o después
+          del inicio explican una desviación. Un evento UNKNOWN no explica nada.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-2">

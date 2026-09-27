@@ -126,7 +126,7 @@ export function ConsumptionChart({
           { label: consumptionConfig.kwh.label, swatch: COLOR.series },
           {
             label: thresholdPct
-              ? `${consumptionConfig.band.label} (baseline ±${thresholdPct} %)`
+              ? `${consumptionConfig.band.label} (hasta ${thresholdPct} % sobre o bajo el baseline)`
               : consumptionConfig.band.label,
             swatch: COLOR.band,
             area: true,

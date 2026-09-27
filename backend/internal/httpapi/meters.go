@@ -20,7 +20,7 @@ type MeterSummary struct {
 	VariationPct   *float64   `gorm:"column:variation_pct" json:"variation_pct"`
 	ReadingsCount  int        `gorm:"column:readings_count" json:"readings_count"`
 	LastReadingAt  *time.Time `gorm:"column:last_reading_at" json:"last_reading_at"`
-	Status         string     `gorm:"column:status" json:"status"` // NORMAL | ALERT | CRITICAL
+	Status         string     `gorm:"column:status" json:"status"` // NORMAL | ALERT | CRITICAL | PENDING (sin analisis)
 	AnomalyID      *uint      `gorm:"column:anomaly_id" json:"anomaly_id"`
 	AnomalyType    *string    `gorm:"column:anomaly_type" json:"anomaly_type"`
 	Severity       *string    `gorm:"column:severity" json:"severity"`
@@ -59,6 +59,7 @@ SELECT m.meter_id, m.name, m.location,
        COALESCE(t.readings_count, 0) AS readings_count,
        t.last_reading_at,
        CASE
+           WHEN (SELECT id FROM last_run) IS NULL THEN @status_pending
            WHEN a.is_anomaly AND a.severity = @severity_high THEN @status_critical
            WHEN a.is_anomaly THEN @status_alert
            ELSE @status_normal
@@ -82,6 +83,7 @@ func (h *Handler) queryMeterSummaries(meterID string) ([]MeterSummary, error) {
 		"status_critical": db.MeterStatusCritical,
 		"status_alert":    db.MeterStatusAlert,
 		"status_normal":   db.MeterStatusNormal,
+		"status_pending":  db.MeterStatusPending,
 		"meter_id":        meterID,
 	}).Scan(&meters).Error
 	return meters, err

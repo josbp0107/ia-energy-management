@@ -2,7 +2,7 @@ export type Severity = "HIGH" | "MEDIUM" | "LOW"
 export type AnomalyType =
   "REAL_ANOMALY" | "EXPLAINABLE_ANOMALY" | "FALSE_POSITIVE" | "DATA_QUALITY"
 export type AnomalyStatus = "OPEN" | "INVESTIGATING" | "RESOLVED" | "DISMISSED"
-export type MeterStatus = "NORMAL" | "ALERT" | "CRITICAL"
+export type MeterStatus = "NORMAL" | "ALERT" | "CRITICAL" | "PENDING"
 export type RunStatus = "RUNNING" | "COMPLETED" | "FAILED"
 export type AnalysisStep =
   | "READINGS"

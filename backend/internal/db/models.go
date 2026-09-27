@@ -35,6 +35,7 @@ const (
 	MeterStatusNormal   = "NORMAL"   // sin anomalía (o falso positivo descartado)
 	MeterStatusAlert    = "ALERT"    // anomalía MEDIUM/LOW
 	MeterStatusCritical = "CRITICAL" // anomalía HIGH
+	MeterStatusPending  = "PENDING"  // todavia no hay ningun analisis completado
 
 	StepReadings       = "READINGS"
 	StepBaseline       = "BASELINE"

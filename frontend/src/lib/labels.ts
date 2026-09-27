@@ -23,6 +23,7 @@ export const meterStatusLabel: Record<MeterStatus, string> = {
   CRITICAL: "Crítico",
   ALERT: "Alerta",
   NORMAL: "Normal",
+  PENDING: "Sin analizar",
 }
 
 export const anomalyStatusLabel: Record<AnomalyStatus, string> = {

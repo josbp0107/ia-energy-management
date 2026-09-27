@@ -146,9 +146,9 @@ export function InvestigationPage() {
             <CardHeader>
               <CardTitle>Consumo frente al baseline</CardTitle>
               <CardDescription>
-                Banda gris: rango normal de cada hora (baseline
-                {rules?.deviation_threshold_pct ?? "…"} %). Sombreado: ventana
-                que detectó la IA.
+                Banda gris: rango normal de cada hora, con un margen de{" "}
+                {rules?.deviation_threshold_pct ?? "…"} % sobre o bajo el
+                baseline. Sombreado: ventana que detectó la IA.
               </CardDescription>
             </CardHeader>
             <CardContent>

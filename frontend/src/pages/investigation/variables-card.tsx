@@ -28,7 +28,7 @@ interface VariableRow {
   baseline: string
   observed: string
   change: string
-  alert: boolean 
+  alert: boolean
 }
 
 function deviationRows(
@@ -47,7 +47,7 @@ function deviationRows(
     },
     {
       label: "Consumo horario (desviación media)",
-      baseline: rules ? `rango ±${threshold} %` : "—",
+      baseline: rules ? `margen de ${threshold} %` : "—",
       observed: "—",
       change: formatPct(dev.mean_hourly_deviation_pct, { signed: true }),
       alert: Math.abs(dev.mean_hourly_deviation_pct) > threshold,

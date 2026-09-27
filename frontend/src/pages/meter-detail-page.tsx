@@ -152,9 +152,10 @@ export function MeterDetailPage() {
         <CardHeader>
           <CardTitle>Consumo por hora</CardTitle>
           <CardDescription>
-            La banda gris es el rango normal de cada hora del día (baseline de
-            la primera semana ±{threshold ?? "…"} %). Las horas fuera de la
-            banda son las que el motor marca como desviadas.
+            La banda gris es el rango normal de cada hora del día: su consumo de
+            la primera semana, con un margen de {threshold ?? "…"} % hacia
+            arriba o hacia abajo. Las horas fuera de la banda son las que el
+            motor marca como desviadas.
           </CardDescription>
         </CardHeader>
         <CardContent>

@@ -269,7 +269,10 @@ function MeterStatusCard({
         {isLoading ? (
           <Skeleton className="h-28 w-full" />
         ) : (
-          (["CRITICAL", "ALERT", "NORMAL"] as const).map((status) => (
+          (count("PENDING") > 0
+            ? (["PENDING"] as const)
+            : (["CRITICAL", "ALERT", "NORMAL"] as const)
+          ).map((status) => (
             <div key={status} className="flex items-center justify-between">
               <MeterStatusBadge status={status} />
               <span className="text-lg font-semibold tabular-nums">

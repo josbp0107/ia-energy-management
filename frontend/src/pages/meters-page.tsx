@@ -38,7 +38,7 @@ const FILTERS = {
   },
   alerts: {
     label: "Alertas",
-    match: (m: MeterSummary) => m.status !== "NORMAL",
+    match: (m: MeterSummary) => m.status === "ALERT" || m.status === "CRITICAL",
   },
   critical: {
     label: "Críticas",
@@ -51,6 +51,7 @@ const statusRank: Record<MeterStatus, number> = {
   CRITICAL: 2,
   ALERT: 1,
   NORMAL: 0,
+  PENDING: 0,
 }
 
 const SORTS = {

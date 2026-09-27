@@ -33,6 +33,7 @@ const meterStatusVariant: Record<MeterStatus, Variant> = {
   CRITICAL: "destructive",
   ALERT: "warning",
   NORMAL: "success",
+  PENDING: "outline",
 }
 
 const anomalyStatusVariant: Record<AnomalyStatus, Variant> = {

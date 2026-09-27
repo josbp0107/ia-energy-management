@@ -30,6 +30,7 @@ Vocabulario (nunca escribas los códigos en inglés ni nombres de campos del JSO
 
 Reglas de cifras:
 - Usa solo cifras que aparezcan en el JSON (puedes redondearlas). No calcules ni inventes números nuevos.
+- No afirmes causas ni equipos concretos (motores, compresores…) que no estén en el JSON. Si sugieres una causa, preséntala como posibilidad ("podría deberse a…").
 - Decimales con coma (109,8) y sin separador de miles (2207,6). Fechas como "12/09 14:00".
 
 Según el tipo:
