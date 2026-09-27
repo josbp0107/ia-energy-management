@@ -43,11 +43,13 @@ export function RunAnalysis() {
   const navigate = useNavigate()
   const [runId, setRunId] = useState<number | null>(null)
   const [open, setOpen] = useState(false)
+  const [confirmOpen, setConfirmOpen] = useState(false)
 
   const start = useMutation({
     mutationFn: api.startAnalysis,
     onSuccess: (run) => {
       setRunId(run.id)
+      setConfirmOpen(false)
       setOpen(true)
     },
     onError: (error) =>
@@ -111,7 +113,7 @@ export function RunAnalysis() {
     <>
       <Button
         size="sm"
-        onClick={() => (isRunning ? setOpen(true) : start.mutate())}
+        onClick={() => (isRunning ? setOpen(true) : setConfirmOpen(true))}
         className="ml-auto"
       >
         {isRunning ? (
@@ -123,6 +125,42 @@ export function RunAnalysis() {
           ? `Analizando… ${Math.min(currentIndex + 1, analysisSteps.length)}/${analysisSteps.length}`
           : "Run AI Analysis"}
       </Button>
+
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={(value) => !start.isPending && setConfirmOpen(value)}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <SparklesIcon className="size-5 text-primary" />
+              ¿Ejecutar el análisis de IA?
+            </DialogTitle>
+            <DialogDescription>
+              Se analizarán todos los medidores y Claude explicará cada
+              hallazgo. Tarda unos segundos. Los resultados reemplazan a los del
+              análisis anterior y todas las anomalías vuelven a quedar abiertas.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setConfirmOpen(false)}
+              disabled={start.isPending}
+            >
+              Cancelar
+            </Button>
+            <Button onClick={() => start.mutate()} disabled={start.isPending}>
+              {start.isPending ? (
+                <Loader2Icon className="animate-spin" />
+              ) : (
+                <SparklesIcon />
+              )}
+              Ejecutar análisis
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="sm:max-w-lg">
