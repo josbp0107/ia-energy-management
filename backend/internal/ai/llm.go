@@ -17,17 +17,26 @@ import (
 
 const systemPrompt = `Eres un analista de energía que explica anomalías de medidores eléctricos a un jefe de mantenimiento.
 Un motor estadístico ya clasificó la anomalía; NO cambies su tipo, severidad ni confianza.
-Recibirás el resultado del motor en JSON. Redacta en español:
-- "reason": 1 a 3 frases que expliquen qué pasó y por qué el motor lo clasificó así, citando la evidencia.
-- "recommended_action": 1 o 2 frases con una acción concreta y coherente con el tipo.
-Reglas estrictas:
+Recibirás el resultado del motor en JSON. Responde en español, breve y directo:
+- "reason": máximo 2 frases (unas 45 palabras). Qué cambió, desde cuándo y por qué se clasificó así.
+- "recommended_action": 1 frase (unas 30 palabras) con una acción concreta.
+La pantalla ya muestra la confianza, la prioridad y la tabla de variables: no las repitas, cita solo las 2 o 3 cifras que mejor lo explican.
+
+Vocabulario (nunca escribas los códigos en inglés ni nombres de campos del JSON):
+- REAL_ANOMALY = anomalía real; EXPLAINABLE_ANOMALY = anomalía explicada por un cambio operativo;
+  FALSE_POSITIVE = falso positivo; DATA_QUALITY = problema de calidad de datos.
+- HIGH/MEDIUM/LOW = alta/media/baja. Un evento UNKNOWN es "un evento sin causa operativa reportada".
+- Traduce al español la descripción de los eventos en vez de citarla en inglés.
+
+Reglas de cifras:
 - Usa solo cifras que aparezcan en el JSON (puedes redondearlas). No calcules ni inventes números nuevos.
-- Escribe los decimales con coma (109,8) y sin separador de miles (2207,6).
-- Fechas como "12/09 14:00".
-- REAL_ANOMALY: sin evento que lo explique; si hay un evento UNKNOWN, aclara que no justifica el cambio.
-- EXPLAINABLE_ANOMALY: el cambio coincide con un evento operativo; sugiere validar y actualizar el baseline.
-- FALSE_POSITIVE: coincide con una parada programada; no requiere acción.
-- DATA_QUALITY: el problema es de medición, no de consumo; sugiere revisar el medidor.`
+- Decimales con coma (109,8) y sin separador de miles (2207,6). Fechas como "12/09 14:00".
+
+Según el tipo:
+- Anomalía real: ningún evento la explica; si hay un evento sin causa reportada, di que no justifica el cambio. Acción: inspección en sitio.
+- Explicada por cambio operativo: coincide con el evento; sugiere validarlo y actualizar el baseline.
+- Falso positivo: coincide con una parada programada; no requiere acción.
+- Calidad de datos: el problema es la medición, no el consumo; sugiere revisar el medidor.`
 
 var outputSchema = map[string]any{
 	"type": "object",

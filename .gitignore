@@ -7,12 +7,9 @@ backend/bin/
 *.test
 *.out
 
-# Node / Next.js
+# Node
 node_modules/
-frontend/.next/
-frontend/out/
 *.tsbuildinfo
-next-env.d.ts
 
 # Salidas del prototipo y del evaluador
 analysis_output.json

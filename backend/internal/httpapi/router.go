@@ -40,6 +40,7 @@ func NewRouter(database *gorm.DB, cfg config.Config, explainer ai.Explainer) (*g
 	api.GET("/meters/:meterId/baseline", h.getMeterBaseline)
 	api.GET("/events", h.listEvents)
 
+	api.GET("/analysis/rules", h.getRules)
 	api.POST("/ai/analyze", h.startAnalysis)
 	api.GET("/ai/analysis/:id", h.getAnalysis)
 	api.GET("/anomalies", h.listAnomalies)

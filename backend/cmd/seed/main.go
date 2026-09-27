@@ -2,6 +2,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"path/filepath"
@@ -14,6 +15,9 @@ import (
 )
 
 func main() {
+	ifEmpty := flag.Bool("if-empty", false, "cargar solo si no hay medidores")
+	flag.Parse()
+
 	cfg, err := config.Load()
 	if err != nil {
 		log.Fatalf("configuración: %v", err)
@@ -22,6 +26,17 @@ func main() {
 	database, err := db.Connect(cfg.DB)
 	if err != nil {
 		log.Fatalf("conectar a la base de datos: %v", err)
+	}
+
+	if *ifEmpty {
+		var count int64
+		if err := database.Model(&db.Meter{}).Count(&count).Error; err != nil {
+			log.Fatalf("contar medidores: %v", err)
+		}
+		if count > 0 {
+			fmt.Printf("La base ya tiene %d medidores: no se recarga (-if-empty)\n", count)
+			return
+		}
 	}
 
 	meterInfo, err := csvdata.LoadMeters(filepath.Join(cfg.DataDir, "meters.csv"))
@@ -53,7 +68,7 @@ func main() {
 	}
 
 	err = database.Transaction(func(tx *gorm.DB) error {
-		for _, model := range []any{&db.Reading{}, &db.Event{}, &db.Meter{}} {
+		for _, model := range []any{&db.Anomaly{}, &db.AnalysisRun{}, &db.Reading{}, &db.Event{}, &db.Meter{}} {
 			if err := tx.Where("1 = 1").Delete(model).Error; err != nil {
 				return err
 			}
@@ -70,5 +85,5 @@ func main() {
 		log.Fatalf("guardar datos: %v", err)
 	}
 
-	fmt.Printf("Seed completo: %d medidores, %d lecturas, %d eventos\n", len(meters), len(readings), len(events))
+	fmt.Printf("Seed completo: %d medidores, %d lecturas, %d eventos (análisis previos borrados)\n", len(meters), len(readings), len(events))
 }

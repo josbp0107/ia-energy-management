@@ -115,7 +115,7 @@ func formatTime(t time.Time) string {
 
 func firstEventDescription(events []analysis.RelatedEvent) string {
 	for _, e := range events {
-		if e.EventType == db.EventOperationalChange || e.EventType == db.EventScheduledOutage {
+		if analysis.ExplainsDeviation(e.EventType) {
 			return e.Description
 		}
 	}

@@ -44,8 +44,15 @@ type Result struct {
 }
 
 type Evidence struct {
-	DataQuality *DataQualityEvidence `json:"data_quality,omitempty"`
-	Deviation   *DeviationEvidence   `json:"deviation,omitempty"`
+	DataQuality       *DataQualityEvidence `json:"data_quality,omitempty"`
+	Deviation         *DeviationEvidence   `json:"deviation,omitempty"`
+	ConfidenceFactors []ConfidenceFactor   `json:"confidence_factors,omitempty"`
+}
+
+type ConfidenceFactor struct {
+	Label   string  `json:"label"`
+	Points  float64 `json:"points"`
+	Applied bool    `json:"applied"`
 }
 
 type DataQualityEvidence struct {

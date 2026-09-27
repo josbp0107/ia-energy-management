@@ -39,13 +39,6 @@ func round(x float64, decimals int) float64 {
 	return v
 }
 
-func boolToFloat(b bool) float64 {
-	if b {
-		return 1
-	}
-	return 0
-}
-
 func minMax(values []float64) (float64, float64) {
 	lo, hi := math.Inf(1), math.Inf(-1)
 	for _, v := range values {

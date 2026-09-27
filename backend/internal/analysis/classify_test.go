@@ -262,3 +262,13 @@ func TestHourlyBaseline(t *testing.T) {
 		}
 	}
 }
+
+func TestCurrentRulesMirrorEngineConstants(t *testing.T) {
+	r := CurrentRules()
+	if r.DeviationThresholdPct != 30 || r.VoltageMin != 209 || r.VoltageMax != 231 || r.EventWindowHours != 3 {
+		t.Errorf("reglas inesperadas: %+v", r)
+	}
+	if !ExplainsDeviation(db.EventScheduledOutage) || ExplainsDeviation(db.EventUnknown) {
+		t.Errorf("solo OPERATIONAL_CHANGE y SCHEDULED_OUTAGE deben explicar una desviación")
+	}
+}

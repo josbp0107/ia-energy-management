@@ -68,6 +68,20 @@ func TestAcceptance(t *testing.T) {
 		})
 	}
 
+	t.Run("los factores de confianza suman la confianza", func(t *testing.T) {
+		for _, r := range results {
+			if r.Type == db.TypeNormal {
+				continue
+			}
+			if len(r.Evidence.ConfidenceFactors) == 0 {
+				t.Fatalf("%s: sin factores de confianza", r.MeterID)
+			}
+			if got := confidence(sumFactors(r.Evidence.ConfidenceFactors)); !almostEqual(got, r.Confidence) {
+				t.Errorf("%s: factores suman %.2f, confianza %.2f", r.MeterID, got, r.Confidence)
+			}
+		}
+	})
+
 	t.Run("M-109 es la prioridad 1", func(t *testing.T) {
 		if results[0].MeterID != "M-109" {
 			t.Errorf("el primero es %s, se esperaba M-109", results[0].MeterID)

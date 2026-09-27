@@ -98,9 +98,12 @@ func classifyDataQuality(result *Result, invalid []db.Reading, events []db.Event
 	result.Anomaly = true
 	result.Type = db.TypeDataQuality
 	result.Severity = db.SeverityHigh
-	result.Confidence = confidence(0.75 +
-		0.10*boolToFloat(stable) +
-		0.10*boolToFloat(len(corroborating) > 0))
+	result.Evidence.ConfidenceFactors = []ConfidenceFactor{
+		{"Base: lecturas físicamente imposibles", 0.75, true},
+		{"Consumo estable (< 5 %): el problema es la medición", 0.10, stable},
+		{"Evento DATA_QUALITY que lo corrobora", 0.10, len(corroborating) > 0},
+	}
+	result.Confidence = confidence(sumFactors(result.Evidence.ConfidenceFactors))
 	result.Evidence.DataQuality = &DataQualityEvidence{
 		InvalidReadings:     len(invalid),
 		FirstInvalid:        first,
@@ -154,8 +157,7 @@ func classifyDeviation(result *Result, flagged []flaggedHour, events []db.Event,
 			Description:    e.Description,
 			EventTimestamp: e.EventTimestamp,
 		})
-		isExplaining := e.EventType == db.EventOperationalChange || e.EventType == db.EventScheduledOutage
-		if isExplaining && explainingType == "" {
+		if ExplainsDeviation(e.EventType) && explainingType == "" {
 			explainingType = e.EventType
 		}
 	}
@@ -166,20 +168,29 @@ func classifyDeviation(result *Result, flagged []flaggedHour, events []db.Event,
 		result.Anomaly = false
 		result.Type = db.TypeFalsePositive
 		result.Severity = db.SeverityLow
-		result.Confidence = confidence(0.85 + 0.10*boolToFloat(hours <= LongDurationHours))
+		result.Evidence.ConfidenceFactors = []ConfidenceFactor{
+			{"Base: coincide con una parada programada", 0.85, true},
+			{"Duración ≤ 24 h, acotada a la parada", 0.10, hours <= LongDurationHours},
+		}
 	case db.EventOperationalChange:
 		result.Type = db.TypeExplainableAnomaly
 		result.Severity = db.SeverityMedium
-		result.Confidence = confidence(0.80 + 0.10*boolToFloat(currentChange > CurrentRise/2))
+		result.Evidence.ConfidenceFactors = []ConfidenceFactor{
+			{"Base: coincide con un cambio operativo", 0.80, true},
+			{"La corriente sube > 15 %: el aumento es real", 0.10, currentChange > CurrentRise/2},
+		}
 	default:
 		result.Type = db.TypeRealAnomaly
 		result.Severity = db.SeverityHigh
-		result.Confidence = confidence(0.70 +
-			0.10*boolToFloat(currentChange > CurrentRise) +
-			0.10*boolToFloat(pfChange < -PowerFactorDrop) +
-			0.05*boolToFloat(hours >= LongDurationHours) +
-			0.03*boolToFloat(math.Abs(variation) > LargeVariationPct))
+		result.Evidence.ConfidenceFactors = []ConfidenceFactor{
+			{"Base: desviación sin evento que la explique", 0.70, true},
+			{"La corriente sube > 30 %", 0.10, currentChange > CurrentRise},
+			{"El factor de potencia cae > 0,10", 0.10, pfChange < -PowerFactorDrop},
+			{"Dura ≥ 24 h (no es un pico pasajero)", 0.05, hours >= LongDurationHours},
+			{"Variación diaria > 50 %", 0.03, math.Abs(variation) > LargeVariationPct},
+		}
 	}
+	result.Confidence = confidence(sumFactors(result.Evidence.ConfidenceFactors))
 
 	result.Evidence.Deviation = &DeviationEvidence{
 		Start:                  start,
@@ -195,6 +206,16 @@ func classifyDeviation(result *Result, flagged []flaggedHour, events []db.Event,
 		ObservedPowerFactor:    round(mean(obsPF), 3),
 		RelatedEvents:          related,
 	}
+}
+
+func sumFactors(factors []ConfidenceFactor) float64 {
+	total := 0.0
+	for _, f := range factors {
+		if f.Applied {
+			total += f.Points
+		}
+	}
+	return total
 }
 
 func confidence(value float64) float64 {

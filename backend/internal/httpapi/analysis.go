@@ -41,6 +41,11 @@ func (h *Handler) startAnalysis(c *gin.Context) {
 	c.JSON(http.StatusAccepted, analysisRunResponse{AnalysisRun: run, Steps: db.AnalysisSteps})
 }
 
+// GET /analysis/rules
+func (h *Handler) getRules(c *gin.Context) {
+	c.JSON(http.StatusOK, analysis.CurrentRules())
+}
+
 // GET /ai/analysis/:id
 func (h *Handler) getAnalysis(c *gin.Context) {
 	id, ok := parseID(c)
