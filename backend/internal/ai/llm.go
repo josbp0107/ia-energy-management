@@ -77,20 +77,7 @@ func (e *LLMExplainer) generate(ctx context.Context, r analysis.Result) (Explana
 	ctx, cancel := context.WithTimeout(ctx, e.timeout)
 	defer cancel()
 
-	resp, err := e.client.Beta.Messages.New(ctx, anthropic.BetaMessageNewParams{
-		Model:     anthropic.Model(e.model),
-		MaxTokens: 16000,
-		System:    []anthropic.BetaTextBlockParam{{Text: systemPrompt}},
-		Messages: []anthropic.BetaMessageParam{
-			anthropic.NewBetaUserMessage(anthropic.NewBetaTextBlock("Resultado del motor:\n" + string(evidence))),
-		},
-		OutputConfig: anthropic.BetaOutputConfigParam{
-			Effort: anthropic.BetaOutputConfigEffortLow,
-			Format: anthropic.BetaJSONOutputFormatParam{Schema: outputSchema},
-		},
-		Fallbacks: anthropic.BetaFallbacksParamUnion{OfDefault: constant.ValueOf[constant.Default]()},
-		Betas:     []anthropic.AnthropicBeta{anthropic.AnthropicBetaServerSideFallback2026_07_01},
-	})
+	resp, err := e.client.Beta.Messages.New(ctx, e.buildParams(string(evidence)))
 	if err != nil {
 		return Explanation{}, fmt.Errorf("llamada a la API: %w", err)
 	}
@@ -122,4 +109,31 @@ func (e *LLMExplainer) generate(ctx context.Context, r analysis.Result) (Explana
 	}
 
 	return Explanation{Reason: out.Reason, RecommendedAction: out.RecommendedAction, Source: SourceLLM}, nil
+}
+
+func (e *LLMExplainer) buildParams(evidence string) anthropic.BetaMessageNewParams {
+	params := anthropic.BetaMessageNewParams{
+		Model:     anthropic.Model(e.model),
+		MaxTokens: 16000,
+		System:    []anthropic.BetaTextBlockParam{{Text: systemPrompt}},
+		Messages: []anthropic.BetaMessageParam{
+			anthropic.NewBetaUserMessage(anthropic.NewBetaTextBlock("Resultado del motor:\n" + evidence)),
+		},
+		OutputConfig: anthropic.BetaOutputConfigParam{
+			Format: anthropic.BetaJSONOutputFormatParam{Schema: outputSchema},
+		},
+	}
+
+	features := featuresFor(e.model)
+	if features.effort {
+		params.OutputConfig.Effort = anthropic.BetaOutputConfigEffortLow
+	}
+	if features.temperature {
+		params.Temperature = anthropic.Float(0)
+	}
+	if features.fallbacks {
+		params.Fallbacks = anthropic.BetaFallbacksParamUnion{OfDefault: constant.ValueOf[constant.Default]()}
+		params.Betas = []anthropic.AnthropicBeta{anthropic.AnthropicBetaServerSideFallback2026_07_01}
+	}
+	return params
 }

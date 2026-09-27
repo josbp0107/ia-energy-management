@@ -173,3 +173,46 @@ func TestNewExplainerWithoutKeyUsesTemplate(t *testing.T) {
 		t.Errorf("sin API key se esperaba TemplateExplainer, se obtuvo %T", explainer)
 	}
 }
+
+func TestBuildParamsPerModel(t *testing.T) {
+	tests := []struct {
+		model         string
+		wantEffort    bool
+		wantTemp      bool
+		wantFallbacks bool
+	}{
+		{"claude-opus-5", true, false, true},
+		{"claude-sonnet-5", true, false, false},
+		{"claude-haiku-4-5", false, true, false},
+		{"claude-sonnet-4-6", false, true, false},
+		{"claude-modelo-futuro-9", false, false, false},
+	}
+	for _, tc := range tests {
+		t.Run(tc.model, func(t *testing.T) {
+			params := NewLLMExplainer("k", tc.model, time.Second).buildParams("{}")
+			raw, err := json.Marshal(params)
+			if err != nil {
+				t.Fatalf("serializar params: %v", err)
+			}
+			var body map[string]any
+			if err := json.Unmarshal(raw, &body); err != nil {
+				t.Fatalf("leer params: %v", err)
+			}
+			outputConfig, _ := body["output_config"].(map[string]any)
+			_, hasEffort := outputConfig["effort"]
+			_, hasTemp := body["temperature"]
+			_, hasFallbacks := body["fallbacks"]
+
+			if hasEffort != tc.wantEffort || hasTemp != tc.wantTemp || hasFallbacks != tc.wantFallbacks {
+				t.Errorf("effort=%v temperature=%v fallbacks=%v; se esperaba %v %v %v",
+					hasEffort, hasTemp, hasFallbacks, tc.wantEffort, tc.wantTemp, tc.wantFallbacks)
+			}
+			if _, ok := outputConfig["format"]; !ok {
+				t.Errorf("todos los modelos deben recibir el esquema JSON (output_config.format)")
+			}
+			if tc.wantFallbacks != (len(params.Betas) > 0) {
+				t.Errorf("la cabecera beta de fallbacks debe ir solo con fallbacks: %v", params.Betas)
+			}
+		})
+	}
+}
